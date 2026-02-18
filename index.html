@@ -292,45 +292,49 @@
         let showInsights = true; // Default: Pop-ups enabled
 
         // --- Configuration ---
+        // REGEX NOTES: \b ensures whole words. Order implies priority for overlapping matches.
         const patterns = [
-            // 1. Identity Phrases
+            // 1. The "I" Identity (Phrases first)
             { regex: /\b(I am|I'm|I've|I'll|my own|myself|kind of person)\b/gi, insight: "Who observes this definition?" },
             
-            // 2. Limiting Language (New: Can't, Won't, Impossible)
+            // 2. The "Other" Identity (Separation)
+            { regex: /\b(you|your|yours|he|him|his|she|her|hers|they|them|their|theirs|we|our|us)\b/gi, insight: "Defining 'them' creates the 'me'. There is only one Observer." },
+
+            // 3. Limiting Language (Impossibility)
             { regex: /\b(can't|cannot|won't|will not|couldn't|could not|unable|impossible|never able)\b/gi, insight: "Who defines this limit? Potential is unknown." },
 
-            // 3. Judgment & Polarity (New: Good/Bad, Nice/Mean)
-            { regex: /\b(good|bad|nice|mean|evil|right|wrong|terrible|awful|great|horrible|worst|best|kind|cruel|nasty|pleasant|unpleasant)\b/gi, insight: "Judgment splits the seamless whole into two." },
+            // 4. Judgment & Polarity (Good/Bad)
+            { regex: /\b(good|bad|nice|mean|evil|right|wrong|terrible|awful|great|horrible|worst|best|kind|cruel|nasty|pleasant|unpleasant)\b/gi, insight: "Labels on a seamless process. Reality just IS." },
 
-            // 4. Craving & Clinging
+            // 5. Craving & Clinging
             { regex: /\b(want|wants|wanted|need|needs|needed|crave|craving|desire|desires|wish|wishing|hope|hopes|cling|clinging|grasp|grasping|attach|attached|attachment)\b/gi, insight: "To want is to affirm lack. Reality is complete." },
 
-            // 5. Aversion & Rejection
+            // 6. Aversion & Rejection
             { regex: /\b(hate|hates|hated|dislike|dislikes|reject|rejecting|avoid|avoiding|fear|fears|loathe|detest|resist|resisting|dread|dreading)\b/gi, insight: "Resistance solidifies the suffering." },
 
-            // 6. Modals & Resistance (Should/Shouldn't)
-            { regex: /\b(should|shouldn't|should not|must|must not|have to|need to|ought to|supposed to)\b/gi, insight: "Arguing with what is creates the illusion of separation." },
+            // 7. Modals & Resistance (Should/Shouldn't)
+            { regex: /\b(should|shouldn't|should not|must|must not|have to|need to|ought to|supposed to)\b/gi, insight: "Arguing with what IS creates the illusion of separation." },
 
-            // 7. Causality
-            { regex: /\b(because|so that|therefore|means that|implies|caused|reason|since)\b/gi, insight: "Causality is a story added to the event." },
+            // 8. Causality & Logic (The "But")
+            { regex: /\b(because|so that|therefore|means that|implies|caused|reason|since|but|however|although|except)\b/gi, insight: "This is the glue holding the story together." },
             
-            // 8. To Be Verbs
+            // 9. Doership (The Illusion of Control)
+            { regex: /\b(did|do|doing|done|make|made|making|create|created|achieve)\b/gi, insight: "Events happen. Who is the doer?" },
+
+            // 10. To Be Verbs
             { regex: /\b(is|are|was|were|be|been)\b/gi, insight: "'To be' creates false permanence. Reality is flux." },
 
-            // 9. Identity Words (Single)
+            // 11. Identity Words (Single)
             { regex: /\b(I|me|my|mine)\b/gi, insight: "Where is this 'I' located exactly?" },
 
-            // 10. Absolutes
-            { regex: /\b(always|never|everyone|no one|everything|nothing|forever|constantly|every time)\b/gi, insight: "Absolutes freeze a fluid reality." },
+            // 12. Absolutes (Corrected Metaphysics)
+            { regex: /\b(always|never|everyone|no one|everything|nothing|forever|constantly|every time)\b/gi, insight: "Concepts fluctuate. Only Awareness is absolute." },
 
-            // 11. Comparison
+            // 13. Comparison
             { regex: /\b(better|worse|failure|success|loser|winner|worthless|unworthy|compared|too much|not enough|stupid|smart|ugly|beautiful|perfect)\b/gi, insight: "Comparison requires two. There is only one." },
 
-            // 12. Time
-            { regex: /\b(will|going to|used to|someday|eventually|regret|future|past|yesterday|tomorrow)\b/gi, insight: "Time is memory or projection. Only Now exists." },
-
-            // 13. External Blame
-            { regex: /\b(made me|fault|blame|unfair|they|he|she|them)\b/gi, insight: "Separation creates the 'other' to blame." }
+            // 14. Time
+            { regex: /\b(will|going to|used to|someday|eventually|regret|future|past|yesterday|tomorrow)\b/gi, insight: "Time is memory or projection. Only Now exists." }
         ];
 
         // --- Core Functions ---
