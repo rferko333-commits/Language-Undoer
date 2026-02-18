@@ -387,4 +387,242 @@
             { regex: /\b(can't|cannot|won't|will not|couldn't|could not|unable|impossible|never able)\b/gi, insight: "Who defines this limit? Potential is unknown." },
 
             // 8. Judgment, Polarity, States
-            { regex: /\b(good|bad|nice|mean|evil|right|wrong|terrible|awful|great|horrible|worst|best|kind|cruel|nasty|pleasant|unpleasant|ha
+            { regex: /\b(good|bad|nice|mean|evil|right|wrong|terrible|awful|great|horrible|worst|best|kind|cruel|nasty|pleasant|unpleasant|happy|sad|unhappy|secure|insecure|lazy|productive|busy|bored|problem|mistake|mistakes|perfect)\b/gi, insight: "Labels on a seamless process. Reality just IS." },
+
+            // 9. Craving & Clinging
+            { regex: /\b(want|wants|wanted|need|needs|needed|crave|craving|desire|desires|wish|wishing|hope|hopes|cling|clinging|grasp|grasping|attach|attached|attachment|like|likes|liked)\b/gi, insight: "To want/like is to affirm lack or preference. Reality is complete." },
+
+            // 10. Aversion & Suffering
+            { regex: /\b(hate|hates|hated|dislike|dislikes|reject|rejecting|avoid|avoiding|fear|fears|loathe|detest|resist|resisting|dread|dreading|suffer|suffering|suffered|unfair|fault|blame|made me|ignored|ignore)\b/gi, insight: "Pain is sensation. Suffering/Blame is the story." },
+
+            // 11. Feelings
+            { regex: /\b(feel|feels|feeling|felt|emotion|emotions)\b/gi, insight: "Feelings are weather. You are the sky." },
+
+            // 12. Material / Survival
+            { regex: /\b(money|work|job|career|rich|poor|success|failure|succeed|fail|achieve)\b/gi, insight: "Survival is the body's program. Awareness needs nothing." },
+
+            // 13. Abstract Narratives
+            { regex: /\b(dream|dreams|situation|timeline|reality|recognition|attention|listens)\b/gi, insight: "A mental construct projected onto Now." },
+
+            // 14. Modals
+            { regex: /\b(should|shouldn't|should not|must|must not|have to|need to|ought to|supposed to)\b/gi, insight: "Arguing with what IS creates the illusion of separation." },
+
+            // 15. Causality
+            { regex: /\b(because|so that|therefore|means that|implies|caused|reason|since|but|however|although|except)\b/gi, insight: "This is the glue holding the story together." },
+            
+            // 16. Doership
+            { regex: /\b(did|do|doing|done|make|made|making|create|created)\b/gi, insight: "Events happen. Who is the doer?" },
+
+            // 17. To Be Verbs
+            { regex: /\b(is|are|was|were|be|been)\b/gi, insight: "Defining 'is-ness' limits the unlimited. Awareness is formless." },
+
+            // 18. Identity Words
+            { regex: /\b(I|me|my|mine)\b/gi, insight: "Where is this 'I' located exactly?" },
+
+            // 19. Absolutes
+            { regex: /\b(always|never|everyone|no one|everything|nothing|forever|constantly|every time)\b/gi, insight: "Concepts fluctuate. Only Awareness is absolute." },
+
+            // 20. Comparison
+            { regex: /\b(better|worse|worthless|unworthy|compared|too much|not enough|stupid|smart|ugly|beautiful)\b/gi, insight: "Comparison requires two. There is only one." },
+
+            // 21. Time
+            { regex: /\b(will|going to|used to|someday|eventually|regret|future|past|yesterday|tomorrow)\b/gi, insight: "Time is memory or projection. Only Now exists." }
+        ];
+
+        // --- Core Functions ---
+
+        function toggleInsights() {
+            showInsights = !showInsights;
+            const toggleEl = document.getElementById('insight-toggle');
+            if (showInsights) {
+                toggleEl.classList.add('toggle-active');
+            } else {
+                toggleEl.classList.remove('toggle-active');
+            }
+        }
+
+        function toggleLog() {
+            isLogVisible = !isLogVisible;
+            const logEl = document.getElementById('history-section');
+            if (isLogVisible) {
+                logEl.style.display = 'block';
+                renderLog();
+                window.scrollTo(0, document.body.scrollHeight);
+            } else {
+                logEl.style.display = 'none';
+            }
+        }
+
+        function analyzeText() {
+            const inputField = document.getElementById('user-input');
+            const rawText = inputField.value;
+            
+            if (!rawText.trim()) return;
+
+            document.getElementById('input-view').style.display = 'none';
+            document.getElementById('output-view').style.display = 'block';
+            document.getElementById('output-stage').innerHTML = '';
+
+            let workingText = escapeHtml(rawText);
+            let replacements = []; 
+
+            patterns.forEach((p) => {
+                workingText = workingText.replace(p.regex, (match) => {
+                    const placeholder = `___BIFURCATION_${replacements.length}___`;
+                    replacements.push({
+                        id: placeholder,
+                        html: `<span class="illusion" onclick="dissolve(this, '${escapeQuotes(p.insight)}', '${escapeQuotes(match)}')">${match}</span>`
+                    });
+                    return placeholder;
+                });
+            });
+
+            replacements.forEach(rep => {
+                workingText = workingText.replace(rep.id, rep.html);
+            });
+
+            document.getElementById('output-stage').innerHTML = workingText;
+        }
+
+        function dissolve(element, insight, word) {
+            if (element.classList.contains('dissolved')) return;
+
+            // 1. Visual Dissolution
+            element.classList.add('dissolved');
+
+            // 2. Track Data
+            trackHistory(word, insight);
+
+            // 3. Show Contextual Insight
+            if (showInsights) {
+                spawnFixedFloater(element, insight);
+            }
+        }
+
+        function spawnFixedFloater(element, text) {
+            const rect = element.getBoundingClientRect();
+            const floater = document.createElement('div');
+            floater.className = 'floater';
+            floater.innerText = text;
+            document.body.appendChild(floater);
+
+            // Positioning Logic
+            const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
+            const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+
+            const floatWidth = floater.offsetWidth;
+            const floatHeight = floater.offsetHeight;
+
+            let left = rect.left + scrollX + (rect.width / 2) - (floatWidth / 2);
+            let top = rect.top + scrollY - floatHeight - 10;
+
+            const viewportWidth = window.innerWidth;
+            const padding = 10;
+
+            // Keep within screen horizontally
+            if (left < padding) {
+                left = padding;
+            } else if (left + floatWidth > viewportWidth - padding) {
+                left = viewportWidth - floatWidth - padding;
+            }
+
+            floater.style.left = left + 'px';
+            floater.style.top = top + 'px';
+
+            setTimeout(() => { floater.remove(); }, 4000); 
+        }
+
+        function trackHistory(word, insight) {
+            const key = word.toLowerCase();
+            
+            if (!historyData[key]) {
+                historyData[key] = {
+                    display: word, 
+                    count: 1, 
+                    insight: insight
+                };
+            } else {
+                historyData[key].count++;
+            }
+
+            if (isLogVisible) renderLog();
+        }
+
+        function renderLog() {
+            const container = document.getElementById('history-content');
+            container.innerHTML = '';
+            
+            // Sort by count
+            const sortedKeys = Object.keys(historyData).sort((a,b) => historyData[b].count - historyData[a].count);
+
+            sortedKeys.forEach(key => {
+                const item = historyData[key];
+                const div = document.createElement('div');
+                div.className = 'log-entry';
+                // New layout: Header with word/count, then insight below
+                div.innerHTML = `
+                    <div class="log-header">
+                        <span class="log-word">${item.display}</span>
+                        <span class="log-count">x${item.count}</span>
+                    </div>
+                    <div class="log-insight">${item.insight}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function enterVoid() {
+            const container = document.getElementById('main-container');
+            const voidOverlay = document.getElementById('void-overlay');
+            const voidMsg = document.getElementById('void-message');
+            const returnBtn = document.getElementById('return-btn');
+            
+            container.classList.add('container-hidden');
+
+            setTimeout(() => {
+                voidOverlay.classList.add('active'); 
+                voidMsg.style.opacity = "1";
+                setTimeout(() => {
+                    returnBtn.style.opacity = "1";
+                }, 3000);
+            }, 1500);
+        }
+
+        function exitVoid() {
+            const container = document.getElementById('main-container');
+            const voidOverlay = document.getElementById('void-overlay');
+            const voidMsg = document.getElementById('void-message');
+            const returnBtn = document.getElementById('return-btn');
+
+            voidMsg.style.opacity = "0";
+            returnBtn.style.opacity = "0";
+            voidOverlay.classList.remove('active');
+
+            setTimeout(() => {
+                container.classList.remove('container-hidden');
+            }, 2000);
+        }
+
+        function resetApp() {
+            document.getElementById('user-input').value = '';
+            document.getElementById('input-view').style.display = 'block';
+            document.getElementById('output-view').style.display = 'none';
+            document.getElementById('output-stage').innerHTML = '';
+            
+            historyData = {}; 
+            renderLog();
+            document.getElementById('history-section').style.display = 'none'; 
+            isLogVisible = false;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return "";
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        function escapeQuotes(text) {
+            return text.replace(/'/g, "\\'");
+        }
+    </script>
+</body>
+</html>
