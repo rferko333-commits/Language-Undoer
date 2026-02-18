@@ -110,6 +110,15 @@
             background: rgba(255,255,255,0.05);
         }
 
+        /* Special style for Dissolve All */
+        .btn-dissolve-all {
+            border-color: var(--highlight-color);
+            color: var(--highlight-color);
+        }
+        .btn-dissolve-all:hover {
+            background: rgba(212, 163, 115, 0.1);
+        }
+
         /* Toggle Switch */
         .toggle-wrapper {
             display: flex;
@@ -167,7 +176,7 @@
         /* Animation: The Dissolve Effect */
         .dissolved {
             opacity: 0;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.8s ease;
             cursor: default;
         }
 
@@ -338,6 +347,7 @@
                     <span>Insights</span>
                 </div>
 
+                <button class="btn-dissolve-all" onclick="dissolveAll()">Dissolve All</button>
                 <button onclick="toggleLog()">History</button>
                 <button onclick="resetApp()">Reset</button>
                 <button onclick="enterVoid()">Silence</button>
@@ -363,69 +373,81 @@
         let isLogVisible = false;
         let historyData = {}; 
 
-        // --- Configuration (Verified Syntax) ---
+        // --- Configuration ---
         const patterns = [
-            // 1. Identity Phrases
+            // 1. Identity Phrases (Multi-word)
             { regex: /\b(I am|I'm|I've|I'll|my own|myself|kind of person)\b/gi, insight: "Who observes this definition?" },
             
             // 2. Separation (The Other)
             { regex: /\b(you|your|yours|he|him|his|she|her|hers|they|them|their|theirs|we|our|us|people|person)\b/gi, insight: "Defining 'them' creates the 'me'. There is only one Observer." },
 
-            // 3. Conditional / Time Creation
+            // 3. Time Units (New)
+            { regex: /\b(second|seconds|minute|minutes|hour|hours|day|days|week|weeks|month|months|year|years|decade|decades|time|times|moment|moments|later|soon)\b/gi, insight: "Time units measure a distance that doesn't exist. Only Now." },
+
+            // 4. Memory/Recency (New)
+            { regex: /\b(memory|memories|remember|remembers|recent|recently)\b/gi, insight: "Memory is a current thought about the past." },
+
+            // 5. Conditional
             { regex: /\b(if|then|when|or)\b/gi, insight: "Conditions create time. Awareness is unconditional." },
 
-            // 4. Distinction (Subject/Object)
-            { regex: /\b(difference|between)\b/gi, insight: "Distinction creates duality. Reality is seamless." },
+            // 6. Distinction / Duality (Updated)
+            { regex: /\b(difference|between|both|friend|enemy|friends|enemies|old|new)\b/gi, insight: "Distinction splits the seamless whole." },
 
-            // 5. Quantity (New)
+            // 7. Numbers & Ordinals (New)
+            { regex: /\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten|hundred|thousand|million|first|second|third|last|final)\b/gi, insight: "Quantification creates separation. Reality is One." },
+
+            // 8. Quantity 
             { regex: /\b(more|less|fewer|extra|many|much)\b/gi, insight: "Quantity is a concept. Awareness has no size." },
 
-            // 6. Difficulty (New)
-            { regex: /\b(hard|harder|easy|easier|difficult|struggle|simple|complex|effort|effortless)\b/gi, insight: "Difficulty is just resistance to what is." },
+            // 9. Difficulty / Intellect (Updated)
+            { regex: /\b(hard|harder|easy|easier|difficult|struggle|simple|complex|effort|effortless|smart|dumb|genius|idiot|intelligent|stupid)\b/gi, insight: "Intellect and difficulty are judgments on what IS." },
 
-            // 7. Limiting Language
+            // 10. Limiting Language
             { regex: /\b(can't|cannot|won't|will not|couldn't|could not|unable|impossible|never able)\b/gi, insight: "Who defines this limit? Potential is unknown." },
 
-            // 8. Judgment, Polarity, States
+            // 11. Competition / Result (New)
+            { regex: /\b(win|lose|won|lost|winning|losing|success|failure|succeed|fail|achieve)\b/gi, insight: "Outcomes are narrative points. The process is continuous." },
+
+            // 12. Judgment, Polarity
             { regex: /\b(good|bad|nice|mean|evil|right|wrong|terrible|awful|great|horrible|worst|best|kind|cruel|nasty|pleasant|unpleasant|happy|sad|unhappy|secure|insecure|lazy|productive|busy|bored|problem|mistake|mistakes|perfect)\b/gi, insight: "Labels on a seamless process. Reality just IS." },
 
-            // 9. Craving & Clinging
-            { regex: /\b(want|wants|wanted|need|needs|needed|crave|craving|desire|desires|wish|wishing|hope|hopes|cling|clinging|grasp|grasping|attach|attached|attachment|like|likes|liked)\b/gi, insight: "To want/like is to affirm lack or preference. Reality is complete." },
+            // 13. Craving & Striving (Updated)
+            { regex: /\b(want|wants|wanted|need|needs|needed|crave|craving|desire|desires|wish|wishing|hope|hopes|cling|clinging|grasp|grasping|attach|attached|attachment|like|likes|liked|try|trying|tried|get|getting|got)\b/gi, insight: "Striving affirms a gap between you and the goal." },
 
-            // 10. Aversion & Suffering
+            // 14. Aversion & Suffering
             { regex: /\b(hate|hates|hated|dislike|dislikes|reject|rejecting|avoid|avoiding|fear|fears|loathe|detest|resist|resisting|dread|dreading|suffer|suffering|suffered|unfair|fault|blame|made me|ignored|ignore)\b/gi, insight: "Pain is sensation. Suffering/Blame is the story." },
 
-            // 11. Feelings
+            // 15. Feelings
             { regex: /\b(feel|feels|feeling|felt|emotion|emotions)\b/gi, insight: "Feelings are weather. You are the sky." },
 
-            // 12. Material / Survival
-            { regex: /\b(money|work|job|career|rich|poor|success|failure|succeed|fail|achieve)\b/gi, insight: "Survival is the body's program. Awareness needs nothing." },
+            // 16. Material / Survival
+            { regex: /\b(money|work|job|career|rich|poor)\b/gi, insight: "Survival is the body's program. Awareness needs nothing." },
 
-            // 13. Abstract Narratives
+            // 17. Abstract Narratives
             { regex: /\b(dream|dreams|situation|timeline|reality|recognition|attention|listens)\b/gi, insight: "A mental construct projected onto Now." },
 
-            // 14. Modals
+            // 18. Modals
             { regex: /\b(should|shouldn't|should not|must|must not|have to|need to|ought to|supposed to)\b/gi, insight: "Arguing with what IS creates the illusion of separation." },
 
-            // 15. Causality
+            // 19. Causality
             { regex: /\b(because|so that|therefore|means that|implies|caused|reason|since|but|however|although|except)\b/gi, insight: "This is the glue holding the story together." },
             
-            // 16. Doership
+            // 20. Doership
             { regex: /\b(did|do|doing|done|make|made|making|create|created)\b/gi, insight: "Events happen. Who is the doer?" },
 
-            // 17. To Be Verbs
+            // 21. To Be Verbs
             { regex: /\b(is|are|was|were|be|been)\b/gi, insight: "Defining 'is-ness' limits the unlimited. Awareness is formless." },
 
-            // 18. Identity Words
-            { regex: /\b(I|me|my|mine)\b/gi, insight: "Where is this 'I' located exactly?" },
+            // 22. Identity Words (including "im" typo)
+            { regex: /\b(I|me|my|mine|im)\b/gi, insight: "Where is this 'I' located exactly?" },
 
-            // 19. Absolutes
+            // 23. Absolutes
             { regex: /\b(always|never|everyone|no one|everything|nothing|forever|constantly|every time)\b/gi, insight: "Concepts fluctuate. Only Awareness is absolute." },
 
-            // 20. Comparison
-            { regex: /\b(better|worse|worthless|unworthy|compared|too much|not enough|stupid|smart|ugly|beautiful)\b/gi, insight: "Comparison requires two. There is only one." },
+            // 24. Comparison
+            { regex: /\b(better|worse|worthless|unworthy|compared|too much|not enough)\b/gi, insight: "Comparison requires two. There is only one." },
 
-            // 21. Time
+            // 25. Time (Future/Past)
             { regex: /\b(will|going to|used to|someday|eventually|regret|future|past|yesterday|tomorrow)\b/gi, insight: "Time is memory or projection. Only Now exists." }
         ];
 
@@ -469,9 +491,10 @@
             patterns.forEach((p) => {
                 workingText = workingText.replace(p.regex, (match) => {
                     const placeholder = `___BIFURCATION_${replacements.length}___`;
+                    // Store data attributes for "Dissolve All" functionality
                     replacements.push({
                         id: placeholder,
-                        html: `<span class="illusion" onclick="dissolve(this, '${escapeQuotes(p.insight)}', '${escapeQuotes(match)}')">${match}</span>`
+                        html: `<span class="illusion" data-insight="${escapeQuotes(p.insight)}" data-word="${escapeQuotes(match)}" onclick="dissolve(this, '${escapeQuotes(p.insight)}', '${escapeQuotes(match)}')">${match}</span>`
                     });
                     return placeholder;
                 });
@@ -497,6 +520,21 @@
             if (showInsights) {
                 spawnFixedFloater(element, insight);
             }
+        }
+
+        function dissolveAll() {
+            const illusions = document.querySelectorAll('.illusion:not(.dissolved)');
+            if (illusions.length === 0) return;
+
+            illusions.forEach(el => {
+                el.classList.add('dissolved');
+                const word = el.getAttribute('data-word');
+                const insight = el.getAttribute('data-insight');
+                trackHistory(word, insight);
+            });
+
+            // Ensure log is rendered if visible
+            if (isLogVisible) renderLog();
         }
 
         function spawnFixedFloater(element, text) {
@@ -544,8 +582,9 @@
             } else {
                 historyData[key].count++;
             }
-
-            if (isLogVisible) renderLog();
+            
+            // If log visible, auto-update
+            if(isLogVisible) renderLog();
         }
 
         function renderLog() {
@@ -559,7 +598,6 @@
                 const item = historyData[key];
                 const div = document.createElement('div');
                 div.className = 'log-entry';
-                // New layout: Header with word/count, then insight below
                 div.innerHTML = `
                     <div class="log-header">
                         <span class="log-word">${item.display}</span>
