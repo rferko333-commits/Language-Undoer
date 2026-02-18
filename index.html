@@ -25,7 +25,7 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            transition: background-color 3s ease;
+            transition: background-color 3s ease, opacity 2s ease;
         }
 
         /* Container for the central experience */
@@ -34,6 +34,7 @@
             max-width: 800px;
             position: relative;
             z-index: 10;
+            transition: opacity 2s ease;
         }
 
         header {
@@ -69,11 +70,12 @@
         /* The Output Area (Where text goes to die) */
         #output-stage {
             min-height: 200px;
-            font-size: 1.2rem;
-            line-height: 1.6;
+            font-size: 1.3rem; /* Slightly larger for readability */
+            line-height: 1.8;
             white-space: pre-wrap;
             display: none; /* Hidden initially */
             color: #eee;
+            padding: 20px;
         }
 
         /* Buttons */
@@ -113,6 +115,7 @@
         }
 
         .illusion:hover {
+            color: #fff;
             text-shadow: 0 0 8px var(--highlight-color);
         }
 
@@ -122,42 +125,61 @@
             filter: blur(10px);
             pointer-events: none;
             transform: scale(1.5);
+            transition: all 1s ease;
         }
 
-        .fade-out {
+        .container-hidden {
             opacity: 0;
-            transition: opacity 2s ease;
+            pointer-events: none;
         }
 
         /* Floating Inquiry Text */
         .floater {
             position: absolute;
-            font-size: 0.8rem;
-            color: #666;
+            font-size: 0.85rem;
+            color: #888; /* Slightly brighter */
             pointer-events: none;
             opacity: 0;
-            animation: floatUp 2s forwards;
-            width: 300px;
+            animation: floatUp 5s forwards; /* Increased to 5s */
+            width: 350px;
             text-align: center;
             z-index: 100;
+            background: rgba(0,0,0,0.8); /* Slight bg to make it readable over text */
+            padding: 5px;
+            border-radius: 4px;
         }
 
         @keyframes floatUp {
             0% { opacity: 0; transform: translate(-50%, 0); }
-            20% { opacity: 1; transform: translate(-50%, -20px); }
+            10% { opacity: 1; transform: translate(-50%, -20px); }
+            70% { opacity: 1; transform: translate(-50%, -30px); } /* Stay visible longer */
             100% { opacity: 0; transform: translate(-50%, -60px); }
         }
 
-        /* The Final Void State */
-        .void-active body {
-            background-color: var(--void-color);
+        /* The Void State Elements */
+        #void-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #333;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 3s ease;
+            text-align: center;
+        }
+
+        #return-btn {
+            margin-top: 20px;
+            border-color: #222;
+            color: #222;
+            opacity: 0;
+            transition: opacity 3s ease;
         }
         
-        .footer-note {
-            position: absolute;
-            bottom: 20px;
-            font-size: 0.7rem;
-            color: #333;
+        #return-btn:hover {
+            color: #555;
+            border-color: #555;
         }
 
     </style>
@@ -166,7 +188,7 @@
 
     <div class="container" id="main-container">
         <header>
-            Language Undoer
+            Language Undoer // Reality Fractal
         </header>
 
         <!-- Input View -->
@@ -187,40 +209,54 @@
         </div>
     </div>
 
-    <div class="footer-note">Pattern Recognition: Local // Storage: None</div>
+    <!-- The Void Overlay Elements -->
+    <div id="void-message">
+        <div>Observe what remains without the story.</div>
+        <button id="return-btn" onclick="exitVoid()">Return to Form</button>
+    </div>
 
     <script>
         // --- The Pattern Library ---
         // Regex rules to catch the machinery of the ego.
         const patterns = [
             {
-                // Absolutes (The black and white fallacy)
-                regex: /\b(always|never|everyone|no one|everything|nothing|forever|impossible|constantly)\b/gi,
-                insight: "Absolutes freeze a fluid reality."
+                // The Self (Aggressive matching for I, Me, Mine)
+                regex: /\b(I|me|my|mine|myself|I'm|I am|I've|I'll)\b/gi,
+                insight: "Who is the 'I' that claims this?"
             },
             {
-                // Identity (The "I am" error)
-                regex: /\b(I am|I'm|I'm a|I am a|my personality|kind of person)\b/gi,
-                insight: "Who observes this definition?"
+                // Causality / Storytelling (The Glue)
+                regex: /\b(because|so|therefore|means that|implies|caused|reason|since)\b/gi,
+                insight: "Causality is a narrative added to the event."
+            },
+            {
+                // To Be Verbs (False Permanence / E-Prime)
+                regex: /\b(is|are|was|were|am)\b/gi,
+                insight: "'To be' implies a fixed state. Reality is flux."
+            },
+            {
+                // Absolutes (The black and white fallacy)
+                regex: /\b(always|never|everyone|no one|everything|nothing|forever|impossible|constantly|every time)\b/gi,
+                insight: "Absolutes freeze a fluid reality."
             },
             {
                 // Modals/Pressure (The "Should" Trap)
                 regex: /\b(should|must|have to|need to|ought to|supposed to)\b/gi,
-                insight: "Who is imposing this rule?"
+                insight: "Who is imposing this rule on reality?"
             },
             {
                 // Comparison & Judgment
-                regex: /\b(better than|worse than|failure|success|loser|winner|worthless|unworthy|compared to|too much|not enough)\b/gi,
+                regex: /\b(better|worse|failure|success|loser|winner|worthless|unworthy|compared|too much|not enough|stupid|smart|ugly|beautiful)\b/gi,
                 insight: "Comparison requires two. There is only one."
             },
             {
                 // Time Binding (Future/Past fixation)
-                regex: /\b(will be|was|going to|used to|someday|eventually|regret|hope)\b/gi,
-                insight: "Time is a memory or a projection."
+                regex: /\b(will be|going to|used to|someday|eventually|regret|hope|future|past|yesterday|tomorrow)\b/gi,
+                insight: "Time is a memory or a projection. There is only Now."
             },
             {
                 // Victimhood / External Cause
-                regex: /\b(because of|made me|fault|blame|unfair|they|he|she)\b/gi,
+                regex: /\b(made me|fault|blame|unfair|they|he|she|them)\b/gi,
                 insight: "Separation creates the 'other'."
             }
         ];
@@ -241,8 +277,6 @@
             let processedText = escapeHtml(input);
 
             // We iterate through patterns and replace matches with interactive spans.
-            // Note: This is a simple replacer. For complex overlaps, we'd need a tokenizer,
-            // but for this purpose, simple replacement works well enough.
             patterns.forEach(p => {
                 processedText = processedText.replace(p.regex, (match) => {
                     return `<span class="illusion" onclick="dissolve(this, '${p.insight}')">${match}</span>`;
@@ -271,44 +305,50 @@
             // 3. Cleanup DOM after animation
             setTimeout(() => {
                 floater.remove();
-            }, 2000);
-            
-            // Optional: Check if all illusions are gone? 
-            // For now, we let the user sit with the Swiss-cheese sentence.
+            }, 5000); // Matches the new CSS animation duration
         }
 
         function enterVoid() {
-            // The "Speechless" Finale
             const container = document.getElementById('main-container');
+            const voidMsg = document.getElementById('void-message');
+            const returnBtn = document.getElementById('return-btn');
             
             // Fade out the interface
-            container.classList.add('fade-out');
+            container.classList.add('container-hidden');
 
-            // Wait, then clear everything for true void
+            // Wait, then clear background for true void
             setTimeout(() => {
-                document.body.innerHTML = ''; // Absolute removal
                 document.body.style.backgroundColor = '#000'; // Pure void
-                document.body.style.cursor = 'none'; // Hide mouse
                 
-                // A tiny, faint message after 5 seconds of silence
+                // Fade in the Void Message
+                voidMsg.style.opacity = "1";
+                
+                // Fade in the return button slightly later
                 setTimeout(() => {
-                    const finalMsg = document.createElement('div');
-                    finalMsg.innerText = "Observe what remains.";
-                    finalMsg.style.color = "#333";
-                    finalMsg.style.fontFamily = "Courier New";
-                    finalMsg.style.fontSize = "0.8rem";
-                    finalMsg.style.position = "absolute";
-                    finalMsg.style.top = "50%";
-                    finalMsg.style.left = "50%";
-                    finalMsg.style.transform = "translate(-50%, -50%)";
-                    finalMsg.style.opacity = "0";
-                    finalMsg.style.transition = "opacity 3s ease";
-                    document.body.appendChild(finalMsg);
-                    
-                    // Fade it in slowly
-                    requestAnimationFrame(() => finalMsg.style.opacity = "1");
-                }, 5000);
+                    returnBtn.style.opacity = "1";
+                    returnBtn.style.pointerEvents = "auto";
+                }, 4000);
 
+            }, 2000);
+        }
+
+        function exitVoid() {
+            const container = document.getElementById('main-container');
+            const voidMsg = document.getElementById('void-message');
+            const returnBtn = document.getElementById('return-btn');
+
+            // Hide void elements
+            voidMsg.style.opacity = "0";
+            returnBtn.style.opacity = "0";
+            returnBtn.style.pointerEvents = "none";
+
+            // Restore background
+            document.body.style.backgroundColor = '#050505';
+
+            // Bring back container
+            setTimeout(() => {
+                container.classList.remove('container-hidden');
+                resetApp(); // Optional: reset to fresh state upon return
             }, 2000);
         }
 
