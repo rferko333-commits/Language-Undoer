@@ -18,21 +18,23 @@
             font-family: var(--font-main);
             margin: 0;
             padding: 0;
-            height: 100vh;
+            min-height: 100vh; /* Changed to min-height for scrolling */
             width: 100vw;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            overflow: hidden;
+            justify-content: flex-start; /* Align top for scrolling */
+            overflow-x: hidden;
             transition: background-color 2s ease;
         }
 
         .container {
-            width: 80%;
+            width: 85%;
             max-width: 800px;
             position: relative;
             z-index: 10;
+            margin-top: 5vh;
+            margin-bottom: 5vh;
             transition: opacity 1s ease;
         }
 
@@ -70,15 +72,14 @@
         /* The Output Area */
         #output-stage {
             width: 100%;
-            height: 250px;
+            min-height: 200px;
             font-size: 1.2rem;
             line-height: 1.8;
             white-space: pre-wrap; 
-            overflow-y: auto;
-            display: none; 
             color: #eee;
             padding: 20px;
             box-sizing: border-box;
+            border-bottom: 1px solid #222;
         }
 
         /* Controls */
@@ -86,19 +87,20 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
             margin-top: 30px;
+            flex-wrap: wrap; /* Wraps on small screens */
         }
 
         button {
             background: transparent;
             border: 1px solid #444;
             color: #888;
-            padding: 12px 30px;
+            padding: 10px 20px;
             cursor: pointer;
             font-family: var(--font-main);
             text-transform: uppercase;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             transition: all 0.3s ease;
         }
 
@@ -114,22 +116,22 @@
             align-items: center;
             gap: 10px;
             color: #666;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             cursor: pointer;
         }
 
         .toggle-box {
-            width: 40px;
-            height: 20px;
+            width: 30px;
+            height: 16px;
             border: 1px solid #444;
             position: relative;
             transition: all 0.3s ease;
         }
 
         .toggle-indicator {
-            width: 16px;
-            height: 16px;
+            width: 12px;
+            height: 12px;
             background-color: #444;
             position: absolute;
             top: 1px;
@@ -137,17 +139,12 @@
             transition: all 0.3s ease;
         }
 
-        /* Toggle Active State */
-        .toggle-active .toggle-box {
-            border-color: var(--highlight-color);
-        }
+        .toggle-active .toggle-box { border-color: var(--highlight-color); }
         .toggle-active .toggle-indicator {
             background-color: var(--highlight-color);
-            transform: translateX(20px);
+            transform: translateX(14px);
         }
-        .toggle-active {
-            color: #aaa;
-        }
+        .toggle-active { color: #aaa; }
 
         /* Illusion Highlighting */
         .illusion {
@@ -178,38 +175,67 @@
             pointer-events: none;
         }
 
-        /* Floating Inquiry Text - Mobile Optimized */
+        /* Floating Inquiry Text - MOBILE FIXED */
         .floater {
-            position: fixed; /* Changed from absolute to fixed for better mobile handling */
-            font-size: 1rem; /* Slightly larger for mobile reading */
+            position: fixed; /* Fixed relative to screen */
+            left: 50%; /* Center horizontally */
+            transform: translateX(-50%);
+            font-size: 1rem;
             color: #fff;
-            background-color: rgba(0,0,0,0.95); /* Darker bg for contrast */
+            background-color: rgba(0,0,0,0.95);
             border: 1px solid #444;
-            padding: 15px 20px;
-            border-radius: 8px;
+            padding: 15px;
+            border-radius: 6px;
             pointer-events: none;
             opacity: 0;
             animation: floatUp 4s forwards;
             
-            /* Responsive Widths */
-            width: auto;
-            max-width: 80vw; /* Never wider than 80% of screen */
-            min-width: 200px;
-            
+            width: 80%;
+            max-width: 400px;
             text-align: center;
-            z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
-            
-            /* Center text horizontally by default */
-            left: 50%;
-            transform: translateX(-50%);
+            z-index: 2000;
+            box-shadow: 0 10px 30px rgba(0,0,0,1);
         }
 
         @keyframes floatUp {
-            0% { opacity: 0; margin-top: 0; }
-            10% { opacity: 1; margin-top: -20px; }
-            80% { opacity: 1; margin-top: -30px; }
-            100% { opacity: 0; margin-top: -60px; }
+            0% { opacity: 0; top: 60%; }
+            10% { opacity: 1; top: 50%; }
+            80% { opacity: 1; top: 45%; }
+            100% { opacity: 0; top: 40%; }
+        }
+
+        /* Dissolution History Log */
+        #history-section {
+            margin-top: 40px;
+            width: 100%;
+            display: none; /* Hidden by default */
+            border-top: 1px solid #222;
+            padding-top: 20px;
+        }
+
+        .log-title {
+            font-size: 0.8rem;
+            color: #555;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .log-entry {
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            color: #888;
+            border-bottom: 1px solid #111;
+            padding-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .log-word {
+            color: var(--highlight-color);
+            font-weight: bold;
+            text-decoration: line-through;
+            margin-right: 15px;
         }
 
         /* Void Overlay */
@@ -251,10 +277,7 @@
             cursor: pointer;
         }
         
-        #return-btn:hover {
-            color: #666;
-            border-color: #666;
-        }
+        #return-btn:hover { color: #666; border-color: #666; }
 
     </style>
 </head>
@@ -267,7 +290,7 @@
 
         <!-- Input View -->
         <div id="input-view">
-            <textarea id="user-input" placeholder="Type your narrative here..."></textarea>
+            <textarea id="user-input" placeholder="Paste your narrative here."></textarea>
             <div class="controls">
                 <button onclick="analyzeText()">Locate Bifurcations</button>
             </div>
@@ -278,14 +301,22 @@
             <div id="output-stage"></div>
             
             <div class="controls">
-                <!-- Toggle Switch -->
+                <!-- Toggle Insights -->
                 <div class="toggle-wrapper toggle-active" id="insight-toggle" onclick="toggleInsights()">
                     <div class="toggle-box"><div class="toggle-indicator"></div></div>
                     <span>Insights</span>
                 </div>
 
+                <!-- Toggle Log -->
+                <button onclick="toggleLog()">View History</button>
                 <button onclick="resetApp()">Reset</button>
                 <button onclick="enterVoid()">Enter Silence</button>
+            </div>
+
+            <!-- The Log -->
+            <div id="history-section">
+                <div class="log-title">Dissolved Illusions</div>
+                <div id="history-content"></div>
             </div>
         </div>
     </div>
@@ -298,51 +329,58 @@
 
     <script>
         // --- State ---
-        let showInsights = true; // Default: Pop-ups enabled
+        let showInsights = true;
+        let isLogVisible = false;
 
         // --- Configuration ---
-        // REGEX NOTES: \b ensures whole words. Order implies priority for overlapping matches.
+        // Order: Phrases -> Words
         const patterns = [
-            // 1. The "I" Identity (Phrases first)
+            // 1. Identity Phrases
             { regex: /\b(I am|I'm|I've|I'll|my own|myself|kind of person)\b/gi, insight: "Who observes this definition?" },
             
-            // 2. The "Other" Identity (Separation)
+            // 2. Separation (The Other)
             { regex: /\b(you|your|yours|he|him|his|she|her|hers|they|them|their|theirs|we|our|us)\b/gi, insight: "Defining 'them' creates the 'me'. There is only one Observer." },
 
-            // 3. Limiting Language (Impossibility)
+            // 3. Conditional / Time Creation (If/Then)
+            { regex: /\b(if|then)\b/gi, insight: "Conditions create time. Awareness is unconditional." },
+
+            // 4. Distinction (Subject/Object)
+            { regex: /\b(difference|between)\b/gi, insight: "Distinction creates duality. Reality is seamless." },
+
+            // 5. Limiting Language (Impossibility)
             { regex: /\b(can't|cannot|won't|will not|couldn't|could not|unable|impossible|never able)\b/gi, insight: "Who defines this limit? Potential is unknown." },
 
-            // 4. Judgment & Polarity (Good/Bad)
+            // 6. Judgment & Polarity (Good/Bad) - Removed 'perfect'
             { regex: /\b(good|bad|nice|mean|evil|right|wrong|terrible|awful|great|horrible|worst|best|kind|cruel|nasty|pleasant|unpleasant)\b/gi, insight: "Labels on a seamless process. Reality just IS." },
 
-            // 5. Craving & Clinging
+            // 7. Craving & Clinging
             { regex: /\b(want|wants|wanted|need|needs|needed|crave|craving|desire|desires|wish|wishing|hope|hopes|cling|clinging|grasp|grasping|attach|attached|attachment)\b/gi, insight: "To want is to affirm lack. Reality is complete." },
 
-            // 6. Aversion & Rejection
-            { regex: /\b(hate|hates|hated|dislike|dislikes|reject|rejecting|avoid|avoiding|fear|fears|loathe|detest|resist|resisting|dread|dreading)\b/gi, insight: "Resistance solidifies the suffering." },
+            // 8. Aversion, Suffering & Victimhood
+            { regex: /\b(hate|hates|hated|dislike|dislikes|reject|rejecting|avoid|avoiding|fear|fears|loathe|detest|resist|resisting|dread|dreading|suffer|suffering|suffered|unfair|fault|blame|made me)\b/gi, insight: "Pain is sensation. Suffering/Blame is the story." },
 
-            // 7. Modals & Resistance (Should/Shouldn't)
+            // 9. Modals & Resistance
             { regex: /\b(should|shouldn't|should not|must|must not|have to|need to|ought to|supposed to)\b/gi, insight: "Arguing with what IS creates the illusion of separation." },
 
-            // 8. Causality & Logic (The "But")
+            // 10. Causality & Logic
             { regex: /\b(because|so that|therefore|means that|implies|caused|reason|since|but|however|although|except)\b/gi, insight: "This is the glue holding the story together." },
             
-            // 9. Doership (The Illusion of Control)
-            { regex: /\b(did|do|doing|done|make|made|making|create|created|achieve)\b/gi, insight: "Events happen. Who is the doer?" },
+            // 11. Doership
+            { regex: /\b(did|do|doing|done|make|made|making|create|created|achieve|success|failure|succeed|fail)\b/gi, insight: "Events happen. Who is the doer?" },
 
-            // 10. To Be Verbs
-            { regex: /\b(is|are|was|were|be|been)\b/gi, insight: "'To be' creates false permanence. Reality is flux." },
+            // 12. To Be Verbs (Philosophical correction)
+            { regex: /\b(is|are|was|were|be|been)\b/gi, insight: "Defining 'is-ness' limits the unlimited. Awareness is formless." },
 
-            // 11. Identity Words (Single)
+            // 13. Identity Words (Single)
             { regex: /\b(I|me|my|mine)\b/gi, insight: "Where is this 'I' located exactly?" },
 
-            // 12. Absolutes (Corrected Metaphysics)
+            // 14. Absolutes (Metaphysical correction)
             { regex: /\b(always|never|everyone|no one|everything|nothing|forever|constantly|every time)\b/gi, insight: "Concepts fluctuate. Only Awareness is absolute." },
 
-            // 13. Comparison
-            { regex: /\b(better|worse|failure|success|loser|winner|worthless|unworthy|compared|too much|not enough|stupid|smart|ugly|beautiful|perfect)\b/gi, insight: "Comparison requires two. There is only one." },
+            // 15. Comparison
+            { regex: /\b(better|worse|worthless|unworthy|compared|too much|not enough|stupid|smart|ugly|beautiful)\b/gi, insight: "Comparison requires two. There is only one." },
 
-            // 14. Time
+            // 16. Time
             { regex: /\b(will|going to|used to|someday|eventually|regret|future|past|yesterday|tomorrow)\b/gi, insight: "Time is memory or projection. Only Now exists." }
         ];
 
@@ -358,19 +396,28 @@
             }
         }
 
+        function toggleLog() {
+            isLogVisible = !isLogVisible;
+            const logEl = document.getElementById('history-section');
+            if (isLogVisible) {
+                logEl.style.display = 'block';
+                // Auto scroll to bottom of page
+                window.scrollTo(0, document.body.scrollHeight);
+            } else {
+                logEl.style.display = 'none';
+            }
+        }
+
         function analyzeText() {
             const inputField = document.getElementById('user-input');
             const rawText = inputField.value;
             
             if (!rawText.trim()) return;
 
-            // Switch UI
             document.getElementById('input-view').style.display = 'none';
             document.getElementById('output-view').style.display = 'block';
-            const stage = document.getElementById('output-stage');
-            stage.style.display = 'block';
+            document.getElementById('output-stage').innerHTML = ''; // clear previous
 
-            // Safe Processing
             let workingText = escapeHtml(rawText);
             let replacements = []; 
 
@@ -380,7 +427,7 @@
                     const placeholder = `___BIFURCATION_${replacements.length}___`;
                     replacements.push({
                         id: placeholder,
-                        html: `<span class="illusion" onclick="dissolve(this, '${escapeQuotes(p.insight)}')">${match}</span>`
+                        html: `<span class="illusion" onclick="dissolve(this, '${escapeQuotes(p.insight)}', '${escapeQuotes(match)}')">${match}</span>`
                     });
                     return placeholder;
                 });
@@ -391,36 +438,37 @@
                 workingText = workingText.replace(rep.id, rep.html);
             });
 
-            stage.innerHTML = workingText;
+            document.getElementById('output-stage').innerHTML = workingText;
         }
 
-        function dissolve(element, insight) {
+        function dissolve(element, insight, word) {
             if (element.classList.contains('dissolved')) return;
 
             // 1. Visual Dissolution
             element.classList.add('dissolved');
 
-            // 2. Show Insight (Only if enabled)
+            // 2. Add to Log
+            addToLog(word, insight);
+
+            // 3. Show Insight (Mobile Fixed Position)
             if (showInsights) {
-                const rect = element.getBoundingClientRect();
                 const floater = document.createElement('div');
                 floater.className = 'floater';
                 floater.innerText = insight;
-                
-                // Position Logic:
-                // We utilize the CSS 'fixed' positioning.
-                // We only need to set the TOP position based on the clicked word.
-                // The LEFT position is handled by CSS (center of screen) to ensure readability on mobile.
-                
-                // Place it slightly above the clicked word
-                floater.style.top = (rect.top - 40) + 'px';
-                
                 document.body.appendChild(floater);
-
+                
                 setTimeout(() => {
                     floater.remove();
-                }, 6000); 
+                }, 5000); 
             }
+        }
+
+        function addToLog(word, insight) {
+            const logContent = document.getElementById('history-content');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-word">${word}</span> <span>${insight}</span>`;
+            logContent.appendChild(entry);
         }
 
         function enterVoid() {
@@ -460,6 +508,9 @@
             document.getElementById('input-view').style.display = 'block';
             document.getElementById('output-view').style.display = 'none';
             document.getElementById('output-stage').innerHTML = '';
+            document.getElementById('history-content').innerHTML = ''; // Clear log
+            document.getElementById('history-section').style.display = 'none'; // Hide log
+            isLogVisible = false;
         }
 
         // --- Helpers ---
