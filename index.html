@@ -8,8 +8,7 @@
         :root {
             --bg-color: #050505;
             --text-color: #b0b0b0;
-            --highlight-color: #d4a373; /* Subtle Bronze/Gold */
-            --void-color: #000000;
+            --highlight-color: #d4a373; /* Bronze/Gold */
             --font-main: 'Courier New', Courier, monospace;
         }
 
@@ -25,17 +24,16 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow: hidden; /* Prevents scrollbars during animations */
-            transition: background-color 3s ease;
+            overflow: hidden;
+            transition: background-color 2s ease;
         }
 
-        /* Container for the central experience */
         .container {
             width: 80%;
             max-width: 800px;
             position: relative;
             z-index: 10;
-            transition: opacity 2s ease;
+            transition: opacity 1s ease;
         }
 
         header {
@@ -60,8 +58,8 @@
             resize: none;
             outline: none;
             border-radius: 4px;
-            box-sizing: border-box; /* Critical for layout */
-            transition: all 0.3s ease;
+            box-sizing: border-box;
+            transition: border 0.3s ease;
         }
 
         textarea:focus {
@@ -75,16 +73,15 @@
             height: 250px;
             font-size: 1.2rem;
             line-height: 1.8;
-            white-space: pre-wrap; /* Preserves newlines/spaces */
-            overflow-y: auto; /* Allow scrolling if text is long */
+            white-space: pre-wrap; /* Preserves formatting */
+            overflow-y: auto;
             display: none; 
             color: #eee;
             padding: 20px;
             box-sizing: border-box;
-            border: 1px solid transparent; /* Keeps layout stable */
         }
 
-        /* Buttons */
+        /* Controls */
         .controls {
             display: flex;
             justify-content: center;
@@ -108,30 +105,28 @@
             color: #fff;
             border-color: #fff;
             background: rgba(255,255,255,0.05);
-            box-shadow: 0 0 15px rgba(255,255,255,0.1);
         }
 
-        /* The Illusion Highlighting */
+        /* Illusion Highlighting */
         .illusion {
             color: var(--highlight-color);
             border-bottom: 1px dashed var(--highlight-color);
             cursor: pointer;
             position: relative;
             display: inline-block;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .illusion:hover {
             color: #fff;
-            background: rgba(212, 163, 115, 0.2);
             text-shadow: 0 0 8px var(--highlight-color);
         }
 
-        /* Animation States */
+        /* Animations */
         .dissolved {
             opacity: 0;
             filter: blur(8px);
-            transform: scale(1.1);
+            transform: scale(1.2);
             pointer-events: none;
             transition: all 0.8s ease;
         }
@@ -141,7 +136,7 @@
             pointer-events: none;
         }
 
-        /* Floating Inquiry Text */
+        /* Floating Inquiry */
         .floater {
             position: absolute;
             font-size: 0.9rem;
@@ -152,13 +147,11 @@
             border-radius: 4px;
             pointer-events: none;
             opacity: 0;
-            animation: floatUp 6s forwards; /* Slowed down to 6s */
+            animation: floatUp 5s forwards;
             width: auto;
             min-width: 200px;
-            max-width: 400px;
             text-align: center;
             z-index: 1000;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
         }
 
         @keyframes floatUp {
@@ -168,14 +161,14 @@
             100% { opacity: 0; transform: translate(-50%, -60px); }
         }
 
-        /* The Void Overlay */
+        /* Void Overlay */
         #void-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none;
+            pointer-events: none; /* Allows clicking through initially */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -189,7 +182,7 @@
             opacity: 0;
             transition: opacity 3s ease;
             margin-bottom: 30px;
-            letter-spacing: 1px;
+            text-align: center;
         }
 
         #return-btn {
@@ -197,12 +190,18 @@
             color: #333;
             opacity: 0;
             transition: opacity 2s ease;
-            pointer-events: auto; /* Allows clicking */
+            cursor: pointer;
+            pointer-events: none; /* disabled until visible */
         }
         
         #return-btn:hover {
             color: #666;
             border-color: #666;
+        }
+        
+        /* When void is active, allow clicking the return button */
+        #void-overlay.active {
+            pointer-events: auto;
         }
 
     </style>
@@ -216,7 +215,152 @@
 
         <!-- Input View -->
         <div id="input-view">
-            <textarea id="user-input" placeholder="Paste your narrative here. Observe the structure of your own suffering."></textarea>
+            <textarea id="user-input" placeholder="Paste your internal narrative here."></textarea>
             <div class="controls">
-                <button onclick="analyzeText()">Locate Bifurcations</button>
+                <button onclick="runAnalysis()">Locate Bifurcations</button>
             </div>
+        </div>
+
+        <!-- Analysis View -->
+        <div id="output-view" style="display:none;">
+            <div id="output-stage"></div>
+            <div class="controls">
+                <button onclick="resetApp()">Reset</button>
+                <button onclick="enterVoid()">Enter Silence</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- The Void Overlay -->
+    <div id="void-overlay">
+        <div id="void-message">Observe what remains without the story.</div>
+        <button id="return-btn" onclick="exitVoid()">Return to Form</button>
+    </div>
+
+    <script>
+        // --- Data: Patterns mapped to Insights ---
+        // Note: All keys are lowercase for matching logic
+        const ruleSet = [
+            {
+                words: ["i am", "i'm", "i've", "i'll", "myself", "my own", "kind of person"],
+                insight: "Who observes this definition?"
+            },
+            {
+                words: ["i", "me", "my", "mine"],
+                insight: "Where is this 'I' located exactly?"
+            },
+            {
+                words: ["because", "so", "therefore", "means that", "implies", "caused", "reason", "since"],
+                insight: "Causality is a story added to the event."
+            },
+            {
+                words: ["is", "are", "was", "were", "be", "been"],
+                insight: "'To be' implies fixed state. Reality is flux."
+            },
+            {
+                words: ["always", "never", "everyone", "no one", "everything", "nothing", "forever", "impossible", "constantly", "every time"],
+                insight: "Absolutes freeze a fluid reality."
+            },
+            {
+                words: ["should", "must", "have to", "need to", "ought to", "supposed to"],
+                insight: "Who is imposing this rule?"
+            },
+            {
+                words: ["better", "worse", "failure", "success", "loser", "winner", "worthless", "unworthy", "compared", "too much", "not enough", "stupid", "smart", "ugly", "beautiful", "perfect"],
+                insight: "Comparison requires two. There is only one."
+            },
+            {
+                words: ["will", "going to", "used to", "someday", "eventually", "regret", "hope", "future", "past", "yesterday", "tomorrow"],
+                insight: "Time is memory or projection. Only Now exists."
+            },
+            {
+                words: ["made me", "fault", "blame", "unfair", "they", "he", "she", "them"],
+                insight: "Separation creates the 'other'."
+            }
+        ];
+
+        // --- Core Engine (Robust Single-Pass) ---
+
+        function runAnalysis() {
+            const inputField = document.getElementById('user-input');
+            const rawText = inputField.value;
+            
+            if (!rawText.trim()) return;
+
+            // 1. Switch UI
+            document.getElementById('input-view').style.display = 'none';
+            document.getElementById('output-view').style.display = 'block';
+            const stage = document.getElementById('output-stage');
+            stage.style.display = 'block';
+
+            // 2. Prepare the regex
+            // We flatten all 'words' arrays into one giant list
+            let allPatterns = [];
+            ruleSet.forEach(rule => {
+                allPatterns = allPatterns.concat(rule.words);
+            });
+
+            // CRITICAL: Sort by length (longest first) to prevent partial matching errors
+            // e.g. Match "I am" before matching "I"
+            allPatterns.sort((a, b) => b.length - a.length);
+
+            // Escape special regex characters in the words (just in case)
+            const escapedPatterns = allPatterns.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+            
+            // Create the Master Regex
+            // \b ensures we match whole words only
+            const masterRegex = new RegExp(`\\b(${escapedPatterns.join('|')})\\b`, 'gi');
+
+            // 3. Process Text (Single Pass)
+            // We use a safe replace loop that builds the string immediately
+            const processedHTML = escapeHtml(rawText).replace(masterRegex, (match) => {
+                // Find the insight for this match
+                const lowerMatch = match.toLowerCase();
+                let foundInsight = "Dissolve the illusion."; // Fallback
+
+                // Look up which rule this word belongs to
+                for (let rule of ruleSet) {
+                    // Check if the lowercase match matches any word in this rule
+                    // We check exact match because regex handled the boundaries
+                    if (rule.words.includes(lowerMatch)) {
+                        foundInsight = rule.insight;
+                        break;
+                    }
+                }
+
+                // Return the HTML span
+                // We assume 'match' is safe because it came from text we just escaped, 
+                // but strictly speaking, the match itself is just text.
+                return `<span class="illusion" onclick="dissolve(this, '${escapeQuotes(foundInsight)}')">${match}</span>`;
+            });
+
+            stage.innerHTML = processedHTML;
+        }
+
+        function dissolve(element, insight) {
+            if (element.classList.contains('dissolved')) return;
+
+            // 1. Visual Dissolution
+            element.classList.add('dissolved');
+
+            // 2. Spawn Floating Inquiry
+            const rect = element.getBoundingClientRect();
+            const floater = document.createElement('div');
+            floater.className = 'floater';
+            floater.innerText = insight;
+            
+            // Positioning logic
+            const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            floater.style.left = (rect.left + scrollLeft + (rect.width / 2)) + 'px';
+            floater.style.top = (rect.top + scrollTop) + 'px';
+            
+            document.body.appendChild(floater);
+
+            // 3. Cleanup
+            setTimeout(() => {
+                floater.remove();
+            }, 5000); 
+        }
+
+        function enterVoid() {
