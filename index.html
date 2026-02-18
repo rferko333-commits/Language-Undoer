@@ -178,29 +178,38 @@
             pointer-events: none;
         }
 
-        /* Floating Inquiry Text */
+        /* Floating Inquiry Text - Mobile Optimized */
         .floater {
-            position: absolute;
-            font-size: 0.9rem;
+            position: fixed; /* Changed from absolute to fixed for better mobile handling */
+            font-size: 1rem; /* Slightly larger for mobile reading */
             color: #fff;
-            background-color: rgba(0,0,0,0.9);
-            border: 1px solid #333;
-            padding: 8px 12px;
-            border-radius: 4px;
+            background-color: rgba(0,0,0,0.95); /* Darker bg for contrast */
+            border: 1px solid #444;
+            padding: 15px 20px;
+            border-radius: 8px;
             pointer-events: none;
             opacity: 0;
             animation: floatUp 6s forwards;
+            
+            /* Responsive Widths */
             width: auto;
-            min-width: 250px;
+            max-width: 80vw; /* Never wider than 80% of screen */
+            min-width: 200px;
+            
             text-align: center;
             z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+            
+            /* Center text horizontally by default */
+            left: 50%;
+            transform: translateX(-50%);
         }
 
         @keyframes floatUp {
-            0% { opacity: 0; transform: translate(-50%, 0); }
-            10% { opacity: 1; transform: translate(-50%, -20px); }
-            70% { opacity: 1; transform: translate(-50%, -40px); }
-            100% { opacity: 0; transform: translate(-50%, -60px); }
+            0% { opacity: 0; margin-top: 0; }
+            10% { opacity: 1; margin-top: -20px; }
+            80% { opacity: 1; margin-top: -30px; }
+            100% { opacity: 0; margin-top: -60px; }
         }
 
         /* Void Overlay */
@@ -398,10 +407,13 @@
                 floater.className = 'floater';
                 floater.innerText = insight;
                 
-                const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                floater.style.left = (rect.left + scrollLeft + (rect.width / 2)) + 'px';
-                floater.style.top = (rect.top + scrollTop) + 'px';
+                // Position Logic:
+                // We utilize the CSS 'fixed' positioning.
+                // We only need to set the TOP position based on the clicked word.
+                // The LEFT position is handled by CSS (center of screen) to ensure readability on mobile.
+                
+                // Place it slightly above the clicked word
+                floater.style.top = (rect.top - 40) + 'px';
                 
                 document.body.appendChild(floater);
 
