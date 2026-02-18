@@ -85,6 +85,7 @@
         .controls {
             display: flex;
             justify-content: center;
+            align-items: center;
             gap: 20px;
             margin-top: 30px;
         }
@@ -105,6 +106,47 @@
             color: #fff;
             border-color: #fff;
             background: rgba(255,255,255,0.05);
+        }
+
+        /* Toggle Switch */
+        .toggle-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #666;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .toggle-box {
+            width: 40px;
+            height: 20px;
+            border: 1px solid #444;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-indicator {
+            width: 16px;
+            height: 16px;
+            background-color: #444;
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            transition: all 0.3s ease;
+        }
+
+        /* Toggle Active State */
+        .toggle-active .toggle-box {
+            border-color: var(--highlight-color);
+        }
+        .toggle-active .toggle-indicator {
+            background-color: var(--highlight-color);
+            transform: translateX(20px);
+        }
+        .toggle-active {
+            color: #aaa;
         }
 
         /* Illusion Highlighting */
@@ -147,7 +189,7 @@
             border-radius: 4px;
             pointer-events: none;
             opacity: 0;
-            animation: floatUp 6s forwards; /* Increased visibility time */
+            animation: floatUp 6s forwards;
             width: auto;
             min-width: 250px;
             text-align: center;
@@ -225,7 +267,14 @@
         <!-- Analysis View -->
         <div id="output-view" style="display:none;">
             <div id="output-stage"></div>
+            
             <div class="controls">
+                <!-- New Toggle Switch -->
+                <div class="toggle-wrapper toggle-active" id="insight-toggle" onclick="toggleInsights()">
+                    <div class="toggle-box"><div class="toggle-indicator"></div></div>
+                    <span>Insights</span>
+                </div>
+
                 <button onclick="resetApp()">Reset</button>
                 <button onclick="enterVoid()">Enter Silence</button>
             </div>
@@ -239,41 +288,58 @@
     </div>
 
     <script>
+        // --- State ---
+        let showInsights = true; // Default: Pop-ups enabled
+
         // --- Configuration ---
-        
-        // This is the pattern matching list.
-        // KEY CHANGE: Order matters. Longer phrases must come before shorter words.
-        // e.g., "I am" matches before "I" to prevent double-matching.
+        // Patterns are matched sequentially. 
+        // IMPORTANT: Multi-word phrases must come BEFORE single words to match correctly.
         const patterns = [
-            // 1. Identity Phrases (Multi-word)
+            // 1. Identity Phrases
             { regex: /\b(I am|I'm|I've|I'll|my own|myself|kind of person)\b/gi, insight: "Who observes this definition?" },
             
-            // 2. Causality (The glue of the story)
+            // 2. Craving & Clinging (New Category)
+            { regex: /\b(want|wants|wanted|need|needs|needed|crave|craving|desire|desires|wish|wishing|hope|hopes|cling|clinging|grasp|grasping|attach|attached|attachment)\b/gi, insight: "To want is to affirm lack. Reality is complete." },
+
+            // 3. Aversion & Rejection (New Category)
+            { regex: /\b(hate|hates|hated|dislike|dislikes|reject|rejecting|avoid|avoiding|fear|fears|loathe|detest|resist|resisting|dread|dreading)\b/gi, insight: "Resistance solidifies the suffering." },
+
+            // 4. Causality
             { regex: /\b(because|so that|therefore|means that|implies|caused|reason|since)\b/gi, insight: "Causality is a story added to the event." },
             
-            // 3. To Be Verbs (E-Prime / False Permanence)
-            { regex: /\b(is|are|was|were|be|been)\b/gi, insight: "Verb 'to be' creates false permanence. Reality is flux." },
+            // 5. To Be Verbs
+            { regex: /\b(is|are|was|were|be|been)\b/gi, insight: "'To be' creates false permanence. Reality is flux." },
 
-            // 4. Identity Words (Single-word - processed after phrases)
+            // 6. Identity Words (Single)
             { regex: /\b(I|me|my|mine)\b/gi, insight: "Where is this 'I' located exactly?" },
 
-            // 5. Absolutes
+            // 7. Absolutes
             { regex: /\b(always|never|everyone|no one|everything|nothing|forever|impossible|constantly|every time)\b/gi, insight: "Absolutes freeze a fluid reality." },
 
-            // 6. Modals
+            // 8. Modals
             { regex: /\b(should|must|have to|need to|ought to|supposed to)\b/gi, insight: "Who is imposing this rule?" },
 
-            // 7. Comparison
+            // 9. Comparison
             { regex: /\b(better|worse|failure|success|loser|winner|worthless|unworthy|compared|too much|not enough|stupid|smart|ugly|beautiful|perfect)\b/gi, insight: "Comparison requires two. There is only one." },
 
-            // 8. Time
+            // 10. Time
             { regex: /\b(will|going to|used to|someday|eventually|regret|hope|future|past|yesterday|tomorrow)\b/gi, insight: "Time is memory or projection. Only Now exists." },
 
-            // 9. External Blame
+            // 11. External Blame
             { regex: /\b(made me|fault|blame|unfair|they|he|she|them)\b/gi, insight: "Separation creates the 'other' to blame." }
         ];
 
         // --- Core Functions ---
+
+        function toggleInsights() {
+            showInsights = !showInsights;
+            const toggleEl = document.getElementById('insight-toggle');
+            if (showInsights) {
+                toggleEl.classList.add('toggle-active');
+            } else {
+                toggleEl.classList.remove('toggle-active');
+            }
+        }
 
         function analyzeText() {
             const inputField = document.getElementById('user-input');
@@ -281,21 +347,18 @@
             
             if (!rawText.trim()) return;
 
-            // 1. Switch UI
+            // Switch UI
             document.getElementById('input-view').style.display = 'none';
             document.getElementById('output-view').style.display = 'block';
             const stage = document.getElementById('output-stage');
             stage.style.display = 'block';
 
-            // 2. Process Text Safely
+            // Safe Processing
             let workingText = escapeHtml(rawText);
-            
-            // We use a Map to store replacements to prevent regex overlap issues
-            // (e.g. creating a <span> and then accidentally matching text inside the span tags)
             let replacements = []; 
 
-            // Step A: Find all matches and replace with a unique Placeholder
-            patterns.forEach((p, index) => {
+            // Step A: Find matches, replace with token
+            patterns.forEach((p) => {
                 workingText = workingText.replace(p.regex, (match) => {
                     const placeholder = `___BIFURCATION_${replacements.length}___`;
                     replacements.push({
@@ -306,7 +369,7 @@
                 });
             });
 
-            // Step B: Swap Placeholders with actual HTML
+            // Step B: Swap tokens with HTML
             replacements.forEach(rep => {
                 workingText = workingText.replace(rep.id, rep.html);
             });
@@ -315,30 +378,29 @@
         }
 
         function dissolve(element, insight) {
-            // Prevent multiple clicks
             if (element.classList.contains('dissolved')) return;
 
             // 1. Visual Dissolution
             element.classList.add('dissolved');
 
-            // 2. Floating Inquiry
-            const rect = element.getBoundingClientRect();
-            const floater = document.createElement('div');
-            floater.className = 'floater';
-            floater.innerText = insight;
-            
-            // Calculate position (accounting for scroll)
-            const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            floater.style.left = (rect.left + scrollLeft + (rect.width / 2)) + 'px';
-            floater.style.top = (rect.top + scrollTop) + 'px';
-            
-            document.body.appendChild(floater);
+            // 2. Show Insight (Only if enabled)
+            if (showInsights) {
+                const rect = element.getBoundingClientRect();
+                const floater = document.createElement('div');
+                floater.className = 'floater';
+                floater.innerText = insight;
+                
+                const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                floater.style.left = (rect.left + scrollLeft + (rect.width / 2)) + 'px';
+                floater.style.top = (rect.top + scrollTop) + 'px';
+                
+                document.body.appendChild(floater);
 
-            // 3. Remove floater after animation (6 seconds)
-            setTimeout(() => {
-                floater.remove();
-            }, 6000); 
+                setTimeout(() => {
+                    floater.remove();
+                }, 6000); 
+            }
         }
 
         function enterVoid() {
@@ -347,21 +409,14 @@
             const voidMsg = document.getElementById('void-message');
             const returnBtn = document.getElementById('return-btn');
             
-            // Fade out app
             container.classList.add('container-hidden');
 
-            // Activate Void
             setTimeout(() => {
-                voidOverlay.classList.add('active'); // Turns background black
-                
-                // Show message
+                voidOverlay.classList.add('active'); 
                 voidMsg.style.opacity = "1";
-                
-                // Show return button
                 setTimeout(() => {
                     returnBtn.style.opacity = "1";
                 }, 3000);
-
             }, 1500);
         }
 
@@ -371,14 +426,10 @@
             const voidMsg = document.getElementById('void-message');
             const returnBtn = document.getElementById('return-btn');
 
-            // Hide Void Elements
             voidMsg.style.opacity = "0";
             returnBtn.style.opacity = "0";
-            
-            // Restore Background
             voidOverlay.classList.remove('active');
 
-            // Show App
             setTimeout(() => {
                 container.classList.remove('container-hidden');
             }, 2000);
@@ -394,12 +445,13 @@
         // --- Helpers ---
         function escapeHtml(text) {
             if (!text) return "";
+            // We escape standard chars but leave apostrophes alone to help regex matching
+            // (Standard browsers handle ' in text nodes fine without escaping)
             return text
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+                .replace(/"/g, "&quot;");
         }
 
         function escapeQuotes(text) {
