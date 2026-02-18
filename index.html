@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Undoer // Reality Fractal</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --text-color: #a0a0a0;
+            --highlight-color: #d4a373; /* Subtle Bronze/Gold for ego knots */
+            --void-color: #000000;
+            --font-main: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: background-color 3s ease;
+        }
+
+        /* Container for the central experience */
+        .container {
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+            z-index: 10;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            opacity: 0.6;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        /* Input Area */
+        textarea {
+            width: 100%;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #333;
+            color: #eee;
+            padding: 20px;
+            font-family: var(--font-main);
+            font-size: 1.1rem;
+            resize: none;
+            outline: none;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            border-color: #555;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* The Output Area (Where text goes to die) */
+        #output-stage {
+            min-height: 200px;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            display: none; /* Hidden initially */
+            color: #eee;
+        }
+
+        /* Buttons */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid #444;
+            color: #888;
+            padding: 10px 25px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            color: #eee;
+            border-color: #eee;
+            box-shadow: 0 0 10px rgba(255,255,255,0.1);
+        }
+
+        /* The Illusion Highlighting */
+        .illusion {
+            color: var(--highlight-color);
+            border-bottom: 1px dashed var(--highlight-color);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.5s ease;
+            display: inline-block;
+        }
+
+        .illusion:hover {
+            text-shadow: 0 0 8px var(--highlight-color);
+        }
+
+        /* Classes for animations */
+        .dissolved {
+            opacity: 0;
+            filter: blur(10px);
+            pointer-events: none;
+            transform: scale(1.5);
+        }
+
+        .fade-out {
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+
+        /* Floating Inquiry Text */
+        .floater {
+            position: absolute;
+            font-size: 0.8rem;
+            color: #666;
+            pointer-events: none;
+            opacity: 0;
+            animation: floatUp 2s forwards;
+            width: 300px;
+            text-align: center;
+            z-index: 100;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 0; transform: translate(-50%, 0); }
+            20% { opacity: 1; transform: translate(-50%, -20px); }
+            100% { opacity: 0; transform: translate(-50%, -60px); }
+        }
+
+        /* The Final Void State */
+        .void-active body {
+            background-color: var(--void-color);
+        }
+        
+        .footer-note {
+            position: absolute;
+            bottom: 20px;
+            font-size: 0.7rem;
+            color: #333;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container" id="main-container">
+        <header>
+            Language Undoer
+        </header>
+
+        <!-- Input View -->
+        <div id="input-view">
+            <textarea id="user-input" placeholder="Type a stressful thought, a belief about yourself, or a recurring internal narrative here..."></textarea>
+            <div class="controls">
+                <button onclick="analyzeText()">Locate Bifurcations</button>
+            </div>
+        </div>
+
+        <!-- Analysis View -->
+        <div id="output-view" style="display:none;">
+            <div id="output-stage"></div>
+            <div class="controls">
+                <button onclick="resetApp()">Reset</button>
+                <button onclick="enterVoid()">Enter Silence</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-note">Pattern Recognition: Local // Storage: None</div>
+
+    <script>
+        // --- The Pattern Library ---
+        // Regex rules to catch the machinery of the ego.
+        const patterns = [
+            {
+                // Absolutes (The black and white fallacy)
+                regex: /\b(always|never|everyone|no one|everything|nothing|forever|impossible|constantly)\b/gi,
+                insight: "Absolutes freeze a fluid reality."
+            },
+            {
+                // Identity (The "I am" error)
+                regex: /\b(I am|I'm|I'm a|I am a|my personality|kind of person)\b/gi,
+                insight: "Who observes this definition?"
+            },
+            {
+                // Modals/Pressure (The "Should" Trap)
+                regex: /\b(should|must|have to|need to|ought to|supposed to)\b/gi,
+                insight: "Who is imposing this rule?"
+            },
+            {
+                // Comparison & Judgment
+                regex: /\b(better than|worse than|failure|success|loser|winner|worthless|unworthy|compared to|too much|not enough)\b/gi,
+                insight: "Comparison requires two. There is only one."
+            },
+            {
+                // Time Binding (Future/Past fixation)
+                regex: /\b(will be|was|going to|used to|someday|eventually|regret|hope)\b/gi,
+                insight: "Time is a memory or a projection."
+            },
+            {
+                // Victimhood / External Cause
+                regex: /\b(because of|made me|fault|blame|unfair|they|he|she)\b/gi,
+                insight: "Separation creates the 'other'."
+            }
+        ];
+
+        // --- Core Functions ---
+
+        function analyzeText() {
+            const input = document.getElementById('user-input').value;
+            if (!input.trim()) return;
+
+            // Switch views
+            document.getElementById('input-view').style.display = 'none';
+            document.getElementById('output-view').style.display = 'block';
+            const stage = document.getElementById('output-stage');
+            stage.style.display = 'block';
+
+            // Process text
+            let processedText = escapeHtml(input);
+
+            // We iterate through patterns and replace matches with interactive spans.
+            // Note: This is a simple replacer. For complex overlaps, we'd need a tokenizer,
+            // but for this purpose, simple replacement works well enough.
+            patterns.forEach(p => {
+                processedText = processedText.replace(p.regex, (match) => {
+                    return `<span class="illusion" onclick="dissolve(this, '${p.insight}')">${match}</span>`;
+                });
+            });
+
+            stage.innerHTML = processedText;
+        }
+
+        function dissolve(element, insight) {
+            // 1. Visual Dissolution of the word
+            element.classList.add('dissolved');
+
+            // 2. Spawn the floating inquiry (The ghost of the thought)
+            const rect = element.getBoundingClientRect();
+            const floater = document.createElement('div');
+            floater.className = 'floater';
+            floater.innerText = insight;
+            
+            // Position near the word
+            floater.style.left = rect.left + (rect.width / 2) + 'px';
+            floater.style.top = rect.top + 'px';
+            
+            document.body.appendChild(floater);
+
+            // 3. Cleanup DOM after animation
+            setTimeout(() => {
+                floater.remove();
+            }, 2000);
+            
+            // Optional: Check if all illusions are gone? 
+            // For now, we let the user sit with the Swiss-cheese sentence.
+        }
+
+        function enterVoid() {
+            // The "Speechless" Finale
+            const container = document.getElementById('main-container');
+            
+            // Fade out the interface
+            container.classList.add('fade-out');
+
+            // Wait, then clear everything for true void
+            setTimeout(() => {
+                document.body.innerHTML = ''; // Absolute removal
+                document.body.style.backgroundColor = '#000'; // Pure void
+                document.body.style.cursor = 'none'; // Hide mouse
+                
+                // A tiny, faint message after 5 seconds of silence
+                setTimeout(() => {
+                    const finalMsg = document.createElement('div');
+                    finalMsg.innerText = "Observe what remains.";
+                    finalMsg.style.color = "#333";
+                    finalMsg.style.fontFamily = "Courier New";
+                    finalMsg.style.fontSize = "0.8rem";
+                    finalMsg.style.position = "absolute";
+                    finalMsg.style.top = "50%";
+                    finalMsg.style.left = "50%";
+                    finalMsg.style.transform = "translate(-50%, -50%)";
+                    finalMsg.style.opacity = "0";
+                    finalMsg.style.transition = "opacity 3s ease";
+                    document.body.appendChild(finalMsg);
+                    
+                    // Fade it in slowly
+                    requestAnimationFrame(() => finalMsg.style.opacity = "1");
+                }, 5000);
+
+            }, 2000);
+        }
+
+        function resetApp() {
+            document.getElementById('user-input').value = '';
+            document.getElementById('input-view').style.display = 'block';
+            document.getElementById('output-view').style.display = 'none';
+            document.getElementById('output-stage').innerHTML = '';
+        }
+
+        // Helper to prevent HTML injection from user input
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+    </script>
+</body>
+</html>
